@@ -8,20 +8,26 @@ import common
 
 
 def lightbulb_cmd(state, did):
-
     new_state = state.get()
-
     logging.info(f"Dashboard: {new_state}")
 
-    # TODO: START
-    # send HTTP request with new actuator state to cloud service
+    # Opprett et ActuatorState-objekt
+    actuator_state = ActuatorState(did=did, state=new_state)
 
-
-    # TODO: END
+    try:
+        # Send HTTP POST-forespørsel til sky-tjenesten
+        response = requests.post(
+            f"{common.CLOUD_API_URL}/actuator",
+            json=actuator_state.to_dict(),
+            timeout=5
+        )
+        response.raise_for_status()
+        logging.info("Tilstand sendt til sky-tjenesten.")
+    except requests.RequestException as e:
+        logging.error(f"Feil ved sending til sky-tjenesten: {e}")
 
 
 def init_lightbulb(container, did):
-
     lb_lf = ttk.LabelFrame(container, text=f'LightBulb [{did}]')
     lb_lf.grid(column=0, row=0, padx=20, pady=20, sticky=tk.W)
 
